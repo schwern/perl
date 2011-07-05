@@ -861,34 +861,6 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
     return gv;
 }
 
-/*
-=for apidoc gv_fetchmethod_autoload
-
-Returns the glob which contains the subroutine to call to invoke the method
-on the C<stash>.  In fact in the presence of autoloading this may be the
-glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
-already setup.
-
-The third parameter of C<gv_fetchmethod_autoload> determines whether
-AUTOLOAD lookup is performed if the given method is not present: non-zero
-means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.
-Calling C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload>
-with a non-zero C<autoload> parameter.
-
-These functions grant C<"SUPER"> token as a prefix of the method name. Note
-that if you want to keep the returned glob for a long time, you need to
-check for it being "AUTOLOAD", since at the later time the call may load a
-different subroutine due to $AUTOLOAD changing its value. Use the glob
-created via a side effect to do this.
-
-These functions have the same side-effects and as C<gv_fetchmeth> with
-C<level==0>.  C<name> should be writable if contains C<':'> or C<'
-''>. The warning against passing the GV returned by C<gv_fetchmeth> to
-C<call_sv> apply equally to these functions.
-
-=cut
-*/
-
 STATIC HV*
 S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
 {
@@ -922,18 +894,103 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
     return stash;
 }
 
-GV *
-Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
-{
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD;
+/*
+=for apidoc gv_fetchmethod_sv_autoload
 
-    return gv_fetchmethod_flags(stash, name, autoload ? GV_AUTOLOAD : 0);
+Exactly like L</gv_fetchmethod_pvn_autoload>, but takes the name string in the form
+of an SV instead of a string/length pair.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmethod_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 autoload, U32 flags)
+{
+    char *namepv;
+    STRLEN namelen;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_AUTOLOAD;
+    namepv = SvPV(namesv, namelen);
+    if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+    return gv_fetchmethod_pvn_autoload(stash, namepv, namelen, autoload, flags);
+}
+
+/*
+=for apidoc gv_fetchmethod_pv_autoload
+
+Exactly like L</gv_fetchmethod_pvn_autoload>, but takes a nul-terminated string
+instead of a string/length pair.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmethod_pv_autoload(pTHX_ HV *stash, const char *name, I32 autoload, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PV_AUTOLOAD;
+
+    return gv_fetchmethod_pvn_autoload(stash, name, strlen(name), autoload, flags);
+}
+
+/*
+=for apidoc gv_fetchmethod_pvn_autoload
+
+Returns the glob which contains the subroutine to call to invoke the method
+on the C<stash>.  In fact in the presence of autoloading this may be the
+glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
+already setup.
+
+The third parameter of C<gv_fetchmethod_pvn_autoload> determines whether
+AUTOLOAD lookup is performed if the given method is not present: non-zero
+means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.
+Calling C<gv_fetchmethod_pvn_flags> is equivalent to calling C<gv_fetchmethod_pvn_autoload>
+with a non-zero C<autoload> parameter.
+
+These functions grant C<"SUPER"> token as a prefix of the method name. Note
+that if you want to keep the returned glob for a long time, you need to
+check for it being "AUTOLOAD", since at the later time the call may load a
+different subroutine due to $AUTOLOAD changing its value. Use the glob
+created via a side effect to do this.
+
+These functions have the same side-effects and as C<gv_fetchmeth_pvn> with
+C<level==0>.  C<name> should be writable if contains C<':'> or C<'
+''>. The warning against passing the GV returned by C<gv_fetchmeth_pvn> to
+C<call_sv> apply equally to these functions.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmethod_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 autoload, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_AUTOLOAD;
+
+    return gv_fetchmethod_pvn_flags(stash, name, len, (autoload ? GV_AUTOLOAD : 0) | flags);
+}
+
+GV *
+Perl_gv_fetchmethod_sv_flags(pTHX_ HV *stash, SV *namesv, U32 flags)
+{
+    char *namepv;
+    STRLEN namelen;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_FLAGS;
+    namepv = SvPV(namesv, namelen);
+    if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+    return gv_fetchmethod_pvn_flags(stash, namepv, namelen, flags);
+}
+
+GV *
+Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PV_FLAGS;
+    return gv_fetchmethod_pvn_flags(stash, name, strlen(name), flags);
 }
 
 /* Don't merge this yet, as it's likely to get a len parameter, and possibly
    even a U32 hash */
 GV *
-Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
+Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
     dVAR;
     register const char *nend;
@@ -945,7 +1002,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
 
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD_FLAGS;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_FLAGS;
 
     if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
@@ -955,7 +1012,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 	   the error reporting code.  */
     }
 
-    for (nend = name; *nend; nend++) {
+    for (nend = name; *nend || nend != (origname + len); nend++) {
 	if (*nend == '\'') {
 	    nsplit = nend;
 	    name = nend + 1;
