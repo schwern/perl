@@ -1228,17 +1228,41 @@ PERL_CALLCONV GV*	Perl_gv_fetchmeth_sv_autoload(pTHX_ HV* stash, SV* namesv, I32
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD	\
 	assert(stash); assert(name)
 
-PERL_CALLCONV GV*	Perl_gv_fetchmethod_autoload(pTHX_ HV* stash, const char* name, I32 autoload)
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_pv_autoload(pTHX_ HV* stash, const char* name, I32 autoload, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD	\
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_PV_AUTOLOAD	\
 	assert(stash); assert(name)
 
-PERL_CALLCONV GV*	Perl_gv_fetchmethod_flags(pTHX_ HV* stash, const char* name, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_pv_flags(pTHX_ HV* stash, const char* name, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_FLAGS	\
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_PV_FLAGS	\
 	assert(stash); assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_pvn_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 autoload, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_AUTOLOAD	\
+	assert(stash); assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_pvn_flags(pTHX_ HV* stash, const char* name, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_FLAGS	\
+	assert(stash); assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_sv_autoload(pTHX_ HV* stash, SV* namesv, I32 autoload, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_AUTOLOAD	\
+	assert(stash); assert(namesv)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmethod_sv_flags(pTHX_ HV* stash, SV* namesv, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_FLAGS	\
+	assert(stash); assert(namesv)
 
 PERL_CALLCONV GV*	Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type)
 			__attribute__nonnull__(pTHX_1);
