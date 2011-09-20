@@ -422,7 +422,28 @@ S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 }
 
 /*
-=for apidoc gv_fetchmeth
+=for apidoc gv_fetchmeth_sv
+
+Exactly like L</gv_fetchmeth_pvn>, but takes the name string in the form
+of an SV instead of a string/length pair.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
+{
+   char *namepv;
+   STRLEN namelen;
+   PERL_ARGS_ASSERT_GV_FETCHMETH_SV;
+   namepv = SvPV(namesv, namelen);
+   if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+   return gv_fetchmeth_pvn(stash, namepv, namelen, level, flags);
+}
+
+/*
+=for apidoc gv_fetchmeth_pvn
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
@@ -432,6 +453,8 @@ The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
 up caching info for this glob.
+
+Currently, the only significant value for C<flags> is SVf_UTF8.
 
 This function grants C<"SUPER"> token as a postfix of the stash name. The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
@@ -445,7 +468,7 @@ obtained from the GV with the C<GvCV> macro.
 /* NOTE: No support for tied ISA */
 
 GV *
-Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
+Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
 {
     dVAR;
     GV** gvp;
@@ -462,7 +485,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     STRLEN packlen;
     U32 topgen_cmp;
 
-    PERL_ARGS_ASSERT_GV_FETCHMETH;
+    PERL_ARGS_ASSERT_GV_FETCHMETH_PVN;
 
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
@@ -560,7 +583,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     /* Check UNIVERSAL without caching */
     if(level == 0 || level == -1) {
-        candidate = gv_fetchmeth(NULL, name, len, 1);
+        candidate = gv_fetchmeth_pvn(NULL, name, len, 1, flags);
         if(candidate) {
             cand_cv = GvCV(candidate);
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
@@ -2060,7 +2083,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	if (i >= DESTROY_amg)
 	    gv = Perl_gv_fetchmeth_autoload(aTHX_ stash, cooky, l, 0);
 	else				/* Autoload taken care of below */
-	    gv = Perl_gv_fetchmeth(aTHX_ stash, cooky, l, -1);
+	    gv = gv_fetchmeth(stash, cooky, l, -1);
         cv = 0;
         if (gv && (cv = GvCV(gv))) {
 	    const char *hvname;
