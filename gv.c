@@ -422,6 +422,10 @@ S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 }
 
 /*
+=for apidoc gv_fetchmeth
+
+Like L</gv_fetchmeth_pvn>, but lacks a flags parameter.
+
 =for apidoc gv_fetchmeth_sv
 
 Exactly like L</gv_fetchmeth_pvn>, but takes the name string in the form
