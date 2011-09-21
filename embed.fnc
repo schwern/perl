@@ -442,6 +442,9 @@ Amd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name \
 Apd	|GV*	|gv_fetchmeth_sv	|NULLOK HV* stash|NN SV* namesv|I32 level|U32 flags
 Apd	|GV*	|gv_fetchmeth_pvn	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|I32 level|U32 flags
+Amd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash \
+					|NN const char* name|STRLEN len \
+					|I32 level
 Apd	|GV*	|gv_fetchmeth_sv_autoload	|NULLOK HV* stash|NN SV* namesv|I32 level|U32 flags
 Apd	|GV*	|gv_fetchmeth_pvn_autoload	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|I32 level|U32 flags
