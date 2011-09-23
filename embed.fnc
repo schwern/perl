@@ -453,6 +453,8 @@ Apd	|GV*	|gv_fetchmeth_pv_autoload	|NULLOK HV* stash|NN const char* name \
 Apd	|GV*	|gv_fetchmeth_pvn_autoload	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|I32 level|U32 flags
 Apdmb	|GV*	|gv_fetchmethod	|NN HV* stash|NN const char* name
+Amd	|GV*	|gv_fetchmethod_autoload|NN HV* stash|NN const char* name \
+				|I32 autoload
 Apd	|GV*	|gv_fetchmethod_sv_autoload|NN HV* stash|NN SV* namesv \
 				|I32 autoload|U32 flags
 Apd	|GV*	|gv_fetchmethod_pv_autoload|NN HV* stash|NN const char* name \

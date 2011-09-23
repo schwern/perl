@@ -1228,6 +1228,10 @@ PERL_CALLCONV GV*	Perl_gv_fetchmeth_sv_autoload(pTHX_ HV* stash, SV* namesv, I32
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD	\
 	assert(stash); assert(name)
 
+/* PERL_CALLCONV GV*	gv_fetchmethod_autoload(pTHX_ HV* stash, const char* name, I32 autoload)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_pv_autoload(pTHX_ HV* stash, const char* name, I32 autoload, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
