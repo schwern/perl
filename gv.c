@@ -921,6 +921,11 @@ Perl_gv_fetchmethod_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 autoload, U32 f
 Exactly like L</gv_fetchmethod_pvn_autoload>, but takes a nul-terminated string
 instead of a string/length pair.
 
+=for apidoc gv_fetchmethod_autoload
+
+Like L</gv_fetchmethod_pvn_autoload>, but takes a nul-terminated string
+instead of a string/length pair, and lacks a flags parameter.
+
 =cut
 */
 
